@@ -1,0 +1,11 @@
+﻿old_found=1 new_found=1 :: 本文明确采用双线叙事：生产线用于3039对数据离线生
+old_found=1 new_found=1 :: 本文框架分为生产流水线与评估流水线两部分。生产流水线
+old_found=1 new_found=1 :: 生产版流程以离线数据产出为目标，步骤为：人工粗配准（
+old_found=1 new_found=1 :: 在工程实践中，单张图像粗配准耗时约10秒。对于3,0
+old_found=1 new_found=1 :: 在生产线上，MI并非与ECC顺序全量串行运行，而是质
+old_found=1 new_found=1 :: 实验在 Windows 11 平台上进行，使用 In
+old_found=0 new_found=0 :: 第4.2节在统一协议下给出六项核心证据：表4(a)模
+old_found=1 new_found=1 :: 真实50对子集结果显示：以有效率/MI/耗时为目标时
+old_found=0 new_found=0 :: 为直观展示本文方法的效果，图5给出了典型样本的精度对
+old_found=1 new_found=1 :: landmark点在统一640×480公共视场坐标系
+old_found=1 new_found=1 :: 本文将生产线与评估线分开论证：生产线采用“人工粗配准

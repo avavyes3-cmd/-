@@ -1,0 +1,159 @@
+1. 任务与问题建模
+
+跨模态图像配准（Cross-modal Registration）：RGB/可见光 ↔ 红外（IR）
+
+离线数据生产线（Offline annotation pipeline）
+
+半自动配准（Semi-automatic registration）：人工粗配准 + 自动精配准
+
+标签迁移（Label transfer / label propagation）：从 RGB 标注迁移到 IR
+
+闭环标注（Closed-loop annotation）：迁移标签 → 训练/验证下游模型 → 用误差分布反推标注问题
+
+森林火灾场景语义分割：smoke / fire / 其他类别（按你文中类定义）
+
+2. 传感器与数据层知识点
+
+**多平台数据（Multi-platform UAV / camera rigs）**与跨平台统计
+
+分辨率与视场差异（Resolution/FOV mismatch）
+
+时空不同步影响（即便同场景，RGB/IR 可能存在小位移/时间差）
+
+成像差异导致的跨模态困难：纹理缺失、对比度、热源/烟雾响应差异
+
+3. 几何与变换模型
+
+2-DOF 平移模型（translation only）
+
+3-DOF 刚体/相似变换（平移+旋转(+缩放)，视你具体实现而定）
+
+仿射变换（Affine transform, 6-DOF）
+
+单应性/透视（Homography / projective）（你用 LoFTR+RANSAC 时容易涉及）
+
+坐标系统一与重采样：warp、插值（双线性/最近邻）、边界处理
+
+金字塔/多分辨率优化（image pyramid）
+
+4. 核心配准方法知识点
+4.1 ECC（Enhanced Correlation Coefficient）配准
+
+ECC 目标函数：相关系数最大化
+
+迭代优化（通常 Gauss-Newton/梯度类）
+
+收敛判据：cc / delta_cc / max_iter 等
+
+失败模式：发散、陷入局部最优、对跨模态强差异敏感
+
+4.2 MI（Mutual Information）配准
+
+**互信息（MI）**与联合熵/边缘熵
+
+直方图估计：bins、联合直方图
+
+优化算法：Powell（无导数优化）
+
+DOF 选择与搜索空间约束：2-DOF 回退策略
+
+跨模态鲁棒性：MI 常用于跨模态（医学影像/多谱段）
+
+4.3 特征匹配基线：LoFTR
+
+学习型局部特征匹配（Transformer-based matching）
+
+匹配点过滤：置信度阈值
+
+鲁棒估计：RANSAC（估计仿射/单应/其它模型）
+
+重投影误差/内点率（inlier ratio）
+
+算力与耗时分析：CPU/GPU 推理、分辨率影响
+
+5. 质量控制与门控（QA / Gating）
+
+门控策略（Gating / fallback policy）：ECC 主跑 + MI 回退
+
+有效像素比例 valid_ratio：warp 后有效视场覆盖比例（你文中用作判据）
+
+收敛度量：cc、delta_cc（或等价指标）
+
+人工 QA / 返工机制：抽检、人工校正
+
+网格搜索阈值选择（grid search on dev set）
+
+开发集/测试集划分思路
+
+6. 评价指标与统计
+6.1 配准质量指标
+
+EdgeF1（边缘一致性 F1）
+
+边缘提取（如 Canny/梯度边缘）
+
+容差阈值（如 3px）与跨分辨率的解释
+
+有效配准率（Effective registration rate）：EdgeF1@3>阈值
+
+均值/中位数/分位数统计：P50/P90/P95 等（你对误差分布有使用）
+
+敏感性分析：阈值 0.25/0.30/0.35 等对结论的影响
+
+（可选但相关）置信区间/方差估计（审稿常要求）
+
+6.2 下游分割指标
+
+mAP@0.5、mAP@0.5:0.95（若有）
+
+类别级指标（per-class AP）：例如 smoke 类偏低
+
+训练/验证划分与数据泄漏风险控制
+
+7. 语义分割模型与训练（下游验证）
+
+YOLOv11s-seg（你文中作为分割骨干）
+
+分割标签格式：mask / polygon / COCO 格式等（你迁移时涉及）
+
+训练超参数：学习率、batch、epoch、增强（若你写了）
+
+域差异（Domain gap）：RGB→IR 的纹理与对比变化
+
+标签噪声对分割性能的影响：边界误差、类别混淆
+
+8. 工程实现与系统层知识点
+
+OpenCV 图像配准模块（ECC 常见实现）
+
+SimpleITK / ITK（互信息注册常用库）（若你用到）
+
+Python 工程化：pipeline、批处理、日志记录
+
+性能评估
+
+单对耗时（ms/s）
+
+生产吞吐（pairs/min）
+
+人工工时（seconds/pair）
+
+可复现性要素
+
+固定随机种子（LoFTR/RANSAC）
+
+版本锁定（opencv / torch / loftr weights）
+
+硬件声明（CPU/GPU）
+
+9. 论文写作中隐含的“研究设计知识点”
+
+Ablation study（消融）：ECC only vs MI only vs gated pipeline vs LoFTR
+
+**Production vs Capability setting（产线 vs 上限）**实验范式
+
+失败案例分析（Failure analysis）
+
+数据偏置与泛化（跨平台/跨场景）
+
+局限性与未来工作：DOF 扩展、自动粗配准、强基线对照
